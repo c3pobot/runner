@@ -10,7 +10,6 @@ module.exports = async(msg = {})=>{
   let content = msg.content.toString().trim().toLowerCase().split(' ')
   if(!(content?.length > 0)) return
 
-  if(msg.content == 'ruh roh') console.log(msg.content)
   let gcr = (await mongo.find('reactions', { _id: 'global' }))[0]?.cr || []
   let lcr = (await mongo.find('reactions', { _id: msg.sId }))[0]?.cr || []
   let vcr = (await mongo.find('reactions', { _id: msg.dId, status: 1 }))[0]?.cr || []
