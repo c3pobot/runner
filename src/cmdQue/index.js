@@ -16,8 +16,8 @@ const processCmd = async(msg = {})=>{
 
 const consumer = client.createConsumer({
   consumerTag: POD_NAME,
-  concurrency: 2,
-  qos: { prefetchCount: 2 },
+  concurrency: 1,
+  qos: { prefetchCount: 1 },
   queue: QUE_NAME,
   queueOptions: { arguments: { 'x-message-ttl': 600000 } },
   lazy: true
