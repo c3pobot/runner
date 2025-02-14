@@ -1,0 +1,19 @@
+{
+  "name": "runner",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "update": "chmod a+x updategitdependency.sh && ./updategitdependency.sh",
+    "build": "chmod a+x buildtestimage.sh && ./buildtestimage.sh c3pobot/runner",
+    "prod": "chmod a+x buildprodimage.sh && ./buildprodimage.sh c3pobot/runner"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "logger": "github:c3pobot/logger",
+    "mongoclient": "github:c3pobot/mongoclient",
+    "rabbitmq-client": "^5.0.2"
+  }
+}
