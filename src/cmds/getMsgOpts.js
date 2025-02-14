@@ -10,6 +10,9 @@ module.exports = async(data = {})=>{
 
   let servers = await mongo.find('discordServer', {}, { _id: 1, instance: 1 })
   if(servers?.length > 0) res.private = servers?.filter(x=>x.instance === 'private')?.map(x=>x._id)
-  rabbitmq.notify({ cmd: 'msgOptsNotify', data: res })
-  log.debug('sent notification of msgOptsNotify...')
+  if(!data?.rpcCall){
+    rabbitmq.notify({ cmd: 'msgOptsNotify', data: res })
+    log.debug('sent notification of msgOptsNotify...')
+  }
+  return res
 }

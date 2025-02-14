@@ -7,6 +7,10 @@ const { dataList } = require('src/dataList')
 
 module.exports = (data = {})=>{
   if(!dataList.numBotShards) return
-  rabbitmq.notify({ cmd: 'numBotShardsNotify', numBotShards: dataList.numBotShards })
-  log.debug('sent notification of numBotShardsNotify...')
+
+  if(!data?.rpcCall){
+    rabbitmq.notify({ cmd: 'numBotShardsNotify', numBotShards: dataList.numBotShards })
+    log.debug('sent notification of numBotShardsNotify...')
+  }
+  return { numBotShards: dataList.numBotShards }
 }

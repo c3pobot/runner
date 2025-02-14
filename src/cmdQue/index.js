@@ -5,10 +5,10 @@ const cmdProcessor = require('./cmdProcessor')
 
 let POD_NAME = process.env.POD_NAME || 'runner', consumerStatus = false, QUE_NAME = 'worker.runner'
 
-const processCmd = async(msg = {})=>{
+const processCmd = async(msg = {}, reply)=>{
   try{
     if(!msg.body) return
-    await cmdProcessor(msg?.body)
+    await cmdProcessor(msg?.body, reply)
   }catch(e){
     log.error(e)
   }

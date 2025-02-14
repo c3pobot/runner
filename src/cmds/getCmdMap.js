@@ -10,6 +10,9 @@ module.exports = async(data = {})=>{
   for(let i in array){
     cmdMap = { ...cmdMap,...array[i].cmdMap }
   }
-  rabbitmq.notify({ cmd: 'cmdMapNotify', data: cmdMap })
-  log.debug('sent notification of cmdMapNotify...')
+  if(!data.rpcCall){
+    rabbitmq.notify({ cmd: 'cmdMapNotify', data: cmdMap })
+    log.debug('sent notification of cmdMapNotify...')
+  }  
+  return cmdMap
 }

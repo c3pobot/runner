@@ -18,6 +18,5 @@ module.exports = async(data = {})=>{
     }
     res.autoObj = tempObj
   }
-  rabbitmq.notify({ cmd: 'autoCompleteNotify', data: res })
-  log.debug('sent notification of autoCompleteNotify...')
+  return res
 }
