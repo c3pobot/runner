@@ -4,7 +4,7 @@ COPY package*.json ./
 RUN npm install --omit=dev
 
 FROM node:20-alpine AS app
-LABEL org.opencontainers.image.source https://github.com/c3pobot/runner
+LABEL org.opencontainers.image.source=https://github.com/c3pobot/runner
 WORKDIR /app
 ENV NODE_PATH=/app
 RUN apk update && \
