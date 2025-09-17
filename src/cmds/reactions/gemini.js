@@ -14,7 +14,8 @@ const getResponse = async( message )=>{
 }
 module.exports = async(msg = {}, botIDs = [], botPingMsg)=>{
   let array = msg?.content?.split(' '), msg2send
-  if(array.length == 1 && botPingMsg){
+  
+  if(array?.length == 1 && botPingMsg && array?.filter(x=>x.includes('<@'))?.length == 1){
     msg2send = botPingMsg
   }else{
     let content = array.filter(x=>!x.includes('<@'))?.join(' ')
