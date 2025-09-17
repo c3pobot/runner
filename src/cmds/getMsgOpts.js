@@ -19,6 +19,5 @@ module.exports = async(data = {})=>{
     rabbitmq.notify({ cmd: 'msgOptsNotify', data: res })
     log.debug('sent notification of msgOptsNotify...')
   }
-  console.log(res)
   return res
 }

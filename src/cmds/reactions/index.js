@@ -3,8 +3,43 @@ const log = require('logger')
 const mongo = require('mongoclient')
 const getResponse = require('./getResponse')
 const rabbitmq = require('src/rabbitmq')
-
+const gemini = require('./gemini')
+const getBotSettings = require('../getBotSettings')
+let botIDs = new Set(), botPingMsg
+const sync = async()=>{
+  try{
+    let status = mongo.status()
+    if(status){
+      let botSettings = await getBotSettings()
+      if(botSettings?.botIDs?.length > 0) botIDs = new Set(botSettings?.botIDs)
+      botPingMsg = botSettings?.botPingMsg
+      setTimeout(sync, 10000)
+    }else{
+      setTimeout(sync, 2000)
+    }
+  }catch(e){
+    log.error(e)
+    setTimeout(sync, 5000)
+  }
+}
+sync()
 module.exports = async(msg = {})=>{
+  if(msg.userMentions?.length > 0){
+    for(let i in msg.userMentions){
+      if(botIDs.has(msg.userMentions[i])){
+        gemini(msg, botIDs, botPingMsg)
+        return
+      }
+    }
+  }
+  if(msg.roleMentions?.length > 0){
+    for(let i in msg.roleMentions){
+      if(botIDs.has(msg.roleMentions[i])){
+        gemini(msg, botIDs, botPingMsg)
+        return
+      }
+    }
+  }
   let botPerms = new Set(msg.botPerms)
   if(!botPerms.has('EmbedLinks') || !botPerms.has('AttachFiles') || !botPerms.has('SendMessages')) return
   let content = msg.content.toString().trim().toLowerCase().split(' ')
