@@ -14,11 +14,14 @@ const getResponse = async( message )=>{
 }
 module.exports = async(msg = {}, botIDs = [], botPingMsg)=>{
   let array = msg?.content?.split(' '), msg2send
-  
-  if(array?.length == 1 && botPingMsg && array?.filter(x=>x.includes('<@'))?.length == 1){
+
+  if(array?.length == 1 && botPingMsg && !msg.reference){
     msg2send = botPingMsg
   }else{
-    let content = array.filter(x=>!x.includes('<@'))?.join(' ')
+    for(let i in botIDs){
+      array = array.filter(x=>!x.includes(botIDs[i]))
+    }
+    let content = array.join(' ')
     if(content) msg2send = await getResponse(content);
   }
   if(msg2send) rabbitmq.notify({ cmd: 'POST', sId: msg.sId, chId: msg.chId, msg: msg2send, msgId: msg.id, podName: msg.podName }, msg.podName, 'bot.msg')

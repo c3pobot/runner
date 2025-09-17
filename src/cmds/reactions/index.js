@@ -27,7 +27,7 @@ module.exports = async(msg = {})=>{
   if(msg.userMentions?.length > 0){
     for(let i in msg.userMentions){
       if(botIDs.has(msg.userMentions[i])){
-        gemini(msg, botIDs, botPingMsg)
+        gemini(msg, [...botIDs], botPingMsg)
         return
       }
     }
@@ -35,7 +35,7 @@ module.exports = async(msg = {})=>{
   if(msg.roleMentions?.length > 0){
     for(let i in msg.roleMentions){
       if(botIDs.has(msg.roleMentions[i])){
-        gemini(msg, botIDs, botPingMsg)
+        gemini(msg, [...botIDs], botPingMsg)
         return
       }
     }
