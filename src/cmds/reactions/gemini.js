@@ -56,8 +56,8 @@ const getResponse = async( message, model )=>{
 }
 const getResponseRetry = async(message, retry = true)=>{
   try{
-    let model = "gemini-2.5-flash-lite"
-    if(!retry) model = "gemini-2.5-flash"
+    let model = "gemini-2.5-flash"
+    if(!retry) model = "gemini-2.5-flash-lite"
     let res = await getResponse(message, model)
     if(res == 503 && retry) return await getResponseRetry(message, false)
     return res
@@ -106,8 +106,18 @@ const swapNameForId = (mentions = [], content = [], type = 'user')=>{
     }
   }
 }
-module.exports = async(msg = {}, botIDs = [], botPingMsg)=>{
+const pruneHistory = (history = []) =>{
+  let i = +(history.length || 0) - 5000
+  if(0 >= i) return
+  while(i > 0){
+    history.shift()
+    i--;
+  }
 
+}
+module.exports = async(msg = {}, botIDs = [], botPingMsg)=>{
+  let history = (await mongo.find('aiHistory', { _id: msg.dId }))[0]?.history || []
+  if(history?.length > 5000) pruneHistory(history)
   let array = msg?.content?.split(' '), msg2send, tempMsg
   let rudeUser, defendMention, attackMention
   if(rude.has(msg.dId)) rudeUser = true
@@ -124,14 +134,18 @@ module.exports = async(msg = {}, botIDs = [], botPingMsg)=>{
     swapIdForName(msg.userMentions, array)
     swapIdForName(msg.roleMentions, array)
     let content = array.join(' ')
-    if(content) tempMsg = await getResponseRetry(getPrompt(`@${msg.username}`, content, defendMention, attackMention, rudeUser));
+    if(content){
+      history.push({ role: 'user', parts: [{ text: getPrompt(`@${msg.username}`, content, defendMention, attackMention, rudeUser) }]})
+      tempMsg = await getResponseRetry(history);
+    }
     if(tempMsg){
       tempMsg = tempMsg.split(' ')
       swapNameForId(msg.userMentions, tempMsg, 'user')
       swapNameForId(msg.roleMentions, tempMsg, 'role')
       msg2send = tempMsg.join(' ')
+      history.push({ role: 'model', parts: [{ text: msg2send }]})
+      await mongo.set('aiHistory', { _id: msg.dId }, { history: history })
     }
-
   }
   if(msg2send) rabbitmq.notify({ cmd: 'POST', sId: msg.sId, chId: msg.chId, msg: truncateString(msg2send, 2000), msgId: msg.id, podName: msg.podName }, msg.podName, 'bot.msg')
 }
