@@ -92,10 +92,23 @@ const swapIdForName = (mentions = [], content = [])=>{
     }
   }
 }
-
+const getMention = (id, type = 'user')=>{
+  if(!id) return
+  let str = `<@`
+  if(type == 'role') str += '&'
+  str += `${id}>`
+  return str
+}
+const swapNameForId = (mentions = [], content = [], type = 'user')=>{
+  for(let i in mentions){
+    for(let a in content){
+      if(content[a].includes(`@${mentions[i].name}`)) content[a] = getMention(mentions[i].id, type)
+    }
+  }
+}
 module.exports = async(msg = {}, botIDs = [], botPingMsg)=>{
 
-  let array = msg?.content?.split(' '), msg2send
+  let array = msg?.content?.split(' '), msg2send, tempMsg
   let rudeUser, defendMention, attackMention
   if(rude.has(msg.dId)) rudeUser = true
   for(let i in msg.userMentions){
@@ -109,8 +122,16 @@ module.exports = async(msg = {}, botIDs = [], botPingMsg)=>{
       array = array.filter(x=>!x.includes(botIDs[i]))
     }
     swapIdForName(msg.userMentions, array)
+    swapIdForName(msg.roleMentions, array)
     let content = array.join(' ')
-    if(content) msg2send = await getResponseRetry(getPrompt(`@${msg.username}`, content, defendMention, attackMention, rudeUser));
+    if(content) tempMsg = await getResponseRetry(getPrompt(`@${msg.username}`, content, defendMention, attackMention, rudeUser));
+    if(tempMsg){
+      tempMsg = tempMsg.split(' ')
+      swapNameForId(msg.userMentions, tempMsg, 'user')
+      swapNameForId(msg.roleMentions, tempMsg, 'role')
+      msg2send = tempMsg.join(' ')
+    }
+
   }
   if(msg2send) rabbitmq.notify({ cmd: 'POST', sId: msg.sId, chId: msg.chId, msg: truncateString(msg2send, 2000), msgId: msg.id, podName: msg.podName }, msg.podName, 'bot.msg')
 }
