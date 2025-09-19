@@ -24,17 +24,9 @@ const sync = async()=>{
 }
 sync()
 module.exports = async(msg = {})=>{
-  if(msg.userMentions?.length > 0){
-    for(let i in msg.userMentions){
-      if(botIDs.has(msg.userMentions[i])){
-        gemini(msg, [...botIDs], botPingMsg)
-        return
-      }
-    }
-  }
-  if(msg.roleMentions?.length > 0){
-    for(let i in msg.roleMentions){
-      if(botIDs.has(msg.roleMentions[i])){
+  if(msg.mentionIds?.length > 0){
+    for(let i in msg.mentionIds){
+      if(botIDs.has(msg.mentionIds[i])){
         gemini(msg, [...botIDs], botPingMsg)
         return
       }
