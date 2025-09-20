@@ -117,7 +117,7 @@ const pruneHistory = (history = []) =>{
 }
 module.exports = async(msg = {}, botIDs = [], botPingMsg)=>{
 
-  let history = (await mongo.find('aiHistory', { _id: msg.sId }))[0]?.history || []
+  let history = (await mongo.find('aiHistory', { _id: msg.chId }))[0]?.history || []
   if(history?.length > 5000) pruneHistory(history)
   let array = msg?.content?.split(' '), msg2send, tempMsg
   let rudeUser, defendMention, attackMention
@@ -140,13 +140,14 @@ module.exports = async(msg = {}, botIDs = [], botPingMsg)=>{
       tempMsg = await getResponseRetry(history);
     }
     if(tempMsg){
+      history.push({ role: 'model', parts: [{ text: tempMsg }]})
+      await mongo.set('aiHistory', { _id: msg.chId }, { history: history })
       tempMsg = tempMsg.split(' ')
       swapNameForId(msg.userMentions, tempMsg, 'user')
       swapNameForId(msg.roleMentions, tempMsg, 'role')
       msg2send = tempMsg.join(' ')
-      history.push({ role: 'model', parts: [{ text: msg2send }]})
-      await mongo.set('aiHistory', { _id: msg.sId }, { history: history })
     }
   }
   if(msg2send) rabbitmq.notify({ cmd: 'POST', sId: msg.sId, chId: msg.chId, msg: truncateString(msg2send, 2000), msgId: msg.id, podName: msg.podName }, msg.podName, 'bot.msg')
 }
+
