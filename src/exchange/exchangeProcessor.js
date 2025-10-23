@@ -28,7 +28,8 @@ Cmds.requestNumBotShards = ()=>{
 }
 Cmds.guildCountUpdate = ({ shardNum, guildCount }) =>{
   if(!(shardNum >= 0 && guildCount > 0 )) return
-  mongo.set('meta', { _id: 'bot-stats' }, { [shardNum]: { shardNum: shardNum, guildCount: guildCount } })
+  let nameKey = `server.${shardNum}`
+  mongo.set('meta', { _id: 'bot-stats' }, { [nameKey]: { shardNum: shardNum, guildCount: guildCount } })
 }
 module.exports = (data)=>{
   try{
