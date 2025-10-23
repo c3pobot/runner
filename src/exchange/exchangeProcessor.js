@@ -1,5 +1,6 @@
 'use strict'
 const log = require('logger')
+const mongo = require('mongoclient')
 const { dataList } = require('src/dataList')
 const { notify } = require('src/rabbitmq')
 const Cmds = {}
@@ -24,6 +25,10 @@ Cmds.requestNumBotShards = ()=>{
   if(!dataList.numBotShards) return
   notify({cmd: 'numBotShardsNotify', numBotShards: dataList.numBotShards})
   log.debug(`sent notify for requestNumBotShards...`)
+}
+Cmds.guildCountUpdate = ({ shardNum, guildCount }) =>{
+  if(!(shardNum >= 0 && guildCount > 0 )) return
+  mongo.set('meta', { _id: 'bot-stats' }, { [shardNum]: { shardNum: shardNum, guildCount: guildCount } })
 }
 module.exports = (data)=>{
   try{

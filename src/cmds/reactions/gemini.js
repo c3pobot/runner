@@ -116,7 +116,7 @@ const pruneHistory = (history = []) =>{
 
 }
 module.exports = async(msg = {}, botIDs = [], botPingMsg)=>{
-
+  console.log(msg.reference)
   let history = (await mongo.find('aiHistory', { _id: msg.chId }))[0]?.history || []
   if(history?.length > 5000) pruneHistory(history)
   let array = msg?.content?.split(' '), msg2send, tempMsg
@@ -150,4 +150,3 @@ module.exports = async(msg = {}, botIDs = [], botPingMsg)=>{
   }
   if(msg2send) rabbitmq.notify({ cmd: 'POST', sId: msg.sId, chId: msg.chId, msg: truncateString(msg2send, 2000), msgId: msg.id, podName: msg.podName }, msg.podName, 'bot.msg')
 }
-
